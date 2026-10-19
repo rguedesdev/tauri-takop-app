@@ -105,10 +105,11 @@ export default function Storage() {
 
   useEffect(() => { void refresh(); }, [refresh]);
 
-  async function updateReaderCollaboration(enabled: boolean) {
+  async function toggleReaderCollaboration() {
     if (toggleRequest.current) return;
     toggleRequest.current = true;
     refreshRequest.current += 1;
+    const enabled = !readerCollaborationRef.current;
     readerCollaborationRef.current = enabled;
     setChangesSaved(false);
     setReaderCollaboration(enabled);
@@ -230,13 +231,10 @@ export default function Storage() {
             <h2 id="reader-collaboration-title">Armazenamento de colaborador</h2>
           </div>
           <div className={styles.switch}>
-            <label className={styles.switchLabel}>
-              <span className={styles.switchControlWrap}>
-                <input className={styles.switchInput} type="checkbox" role="switch" checked={readerCollaboration} aria-label="Ativar armazenamento voluntário de capítulos lidos" onChange={(event) => void updateReaderCollaboration(event.currentTarget.checked)} disabled={loading || savingCollaboration || (readerStatus != null && readerStatus.configuredStorageGb < MIN_READER_STORAGE_GB)} />
-                <span className={styles.switchControl} data-active={readerCollaboration} aria-hidden="true"><span data-active={readerCollaboration} /></span>
-              </span>
-              <span>{savingCollaboration ? "Salvando…" : readerCollaboration ? "Ativado" : "Desativado"}</span>
-            </label>
+            <span>{savingCollaboration ? "Salvando…" : readerCollaboration ? "Ativado" : "Desativado"}</span>
+            <button type="button" className={styles.switchControl} role="switch" aria-checked={readerCollaboration} data-active={readerCollaboration} aria-label="Ativar armazenamento voluntário de capítulos lidos" onClick={() => void toggleReaderCollaboration()} disabled={loading || savingCollaboration || (readerStatus != null && readerStatus.configuredStorageGb < MIN_READER_STORAGE_GB)}>
+              <span data-active={readerCollaboration} />
+            </button>
           </div>
         </div>
         <div className={styles.usage}>
