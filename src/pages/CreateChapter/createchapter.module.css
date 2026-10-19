@@ -1,0 +1,363 @@
+.createChapterPage {
+  min-height: 100vh;
+  min-width: 768px;
+  max-width: 1280px;
+  margin-inline: auto;
+  padding-inline: 16px;
+}
+
+.createChapterContainer {
+  width: 100%;
+  padding-top: 40px;
+}
+
+.backBtn {
+  background-color: steelblue;
+  border-radius: 6px;
+  width: 100px;
+  height: 40px;
+  margin-bottom: 20px;
+}
+
+.createChapterTitle {
+  font-size: 22px;
+  margin-bottom: 20px;
+}
+
+.createChapterForm {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Input Estilizado */
+.inputsContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.inputsLineOne {
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+}
+
+/* Estrutura de empilhamento de cada bloco de campo */
+.fieldWrapper {
+  display: flex;
+  flex-direction: column;
+  width: 100%; /* Largura idêntica travada para todos */
+}
+
+/* Rótulo / Texto superior do campo */
+.fieldLabel {
+  display: block;
+  color: #6b7280;
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-bottom: 4px;
+  padding-left: 2px;
+}
+
+/* Container de referência absoluta para o ícone */
+.inputRelativeContainer {
+  position: relative;
+  width: 100%;
+}
+
+/* Input padrão idêntico para todos */
+.createChapterInput {
+  width: 100%;
+  border: solid 1px #226fe4;
+  border-radius: 8px;
+  padding: 14px 40px 14px 16px; /* Abre espaço na direita para o ícone */
+  color: var(--text-color-primary);
+  font-size: 14px;
+  outline: none;
+  background-color: transparent;
+  box-sizing: border-box;
+}
+
+/* Centralizador universal do React Icons no canto direito */
+.iconContainer {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  right: 14px;
+  display: flex;
+  align-items: center;
+  pointer-events: none;
+  color: #226fe4; /* Cor azul combinando com a sua borda */
+}
+
+/* Texto de ajuda / Mensagem de rodapé */
+.helpText {
+  margin-top: 4px;
+  font-size: 0.7rem;
+  color: #6b7280;
+  padding-left: 2px;
+}
+
+/* Botão de Entrar */
+.createBtn {
+  width: 320px;
+  color: #ffffff;
+  font-size: 16px;
+  background-color: #226fe4;
+  border-radius: 8px;
+  padding: 14px 0;
+  box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.4);
+  border: none;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  margin-top: 20px;
+  font-weight: 500;
+
+  transition: background-color 0.2s ease;
+}
+
+.enterBtn:hover {
+  background-color: #1058c5;
+}
+
+.enterBtn:active {
+  transform: scale(0.98);
+}
+
+.modeTabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 22px;
+  padding: 5px;
+  border-radius: 10px;
+  background: #292c38;
+}
+
+.modeTabs button {
+  flex: 1;
+  padding: 11px 14px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: #b9bdc9;
+  cursor: pointer;
+}
+
+.modeTabs .activeTab {
+  background: #226fe4;
+  color: #fff;
+  font-weight: 700;
+}
+
+.batchSection {
+  display: grid;
+  gap: 16px;
+}
+
+.batchActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.batchActions button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: auto;
+  margin: 0;
+  padding: 11px 15px;
+  border: 0;
+  border-radius: 8px;
+  color: #fff;
+  cursor: pointer;
+}
+
+.batchActions button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.secondaryBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: max-content;
+  gap: 8px;
+  padding: 11px 15px;
+  border: 0;
+  border-radius: 8px;
+  background: #226fe4;
+  color: #fff;
+  font: inherit;
+  cursor: pointer;
+}
+
+.secondaryBtn:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.folderPicker {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.selectedFolder {
+  min-width: 0;
+  max-width: min(560px, 100%);
+  overflow: hidden;
+  color: #aeb3c1;
+  font-size: 0.8rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dangerBtn { background: #a92d44; }
+
+.batchHelp,
+.batchMessage,
+.queueSummary {
+  color: #aeb3c1;
+  font-size: 0.86rem;
+  line-height: 1.5;
+}
+
+.batchMessage {
+  padding: 11px 13px;
+  border: 1px solid #ffffff18;
+  border-radius: 8px;
+  background: #292c38;
+  color: #e3e5eb;
+}
+
+.queueSummary {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  background: #292c38;
+}
+
+.queueSummary span:first-child {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.reviewList {
+  display: grid;
+  gap: 12px;
+}
+
+.reviewCard {
+  display: grid;
+  gap: 12px;
+  padding: 15px;
+  border: 1px solid #ffffff18;
+  border-radius: 10px;
+  background: #30333f;
+}
+
+.reviewCard[data-status="COMPLETED"] { border-color: #3a8b61; }
+.reviewCard[data-status="FAILED"] { border-color: #c94359; }
+.reviewCard[data-status="DUPLICATE"] { border-color: #9a7431; }
+
+.reviewCard > header,
+.reviewCard > footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.reviewCard > footer {
+  color: #aeb3c1;
+  font-size: 0.76rem;
+}
+
+.reviewCard > footer span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.includeToggle {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  gap: 9px;
+  font-weight: 700;
+}
+
+.includeToggle input {
+  width: 17px;
+  height: 17px;
+  accent-color: #226fe4;
+}
+
+.includeToggle span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.statusBadge {
+  flex: none;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: #454958;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.reviewCard[data-status="COMPLETED"] .statusBadge { background: #246947; }
+.reviewCard[data-status="FAILED"] .statusBadge { background: #a92d44; }
+.reviewCard[data-status="DUPLICATE"] .statusBadge { background: #795b24; }
+
+.reviewFields {
+  display: grid;
+  grid-template-columns: minmax(100px, 0.35fr) minmax(220px, 1fr) minmax(145px, 0.45fr);
+  gap: 12px;
+}
+
+.reviewFields label {
+  display: grid;
+  gap: 5px;
+  color: #aeb3c1;
+  font-size: 0.72rem;
+}
+
+.reviewFields input,
+.reviewFields select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ffffff24;
+  border-radius: 7px;
+  background: #282a36;
+  color: #fff;
+}
+
+.reviewFields :disabled {
+  opacity: 0.6;
+}
+
+.itemError {
+  color: #bfdbfe;
+  font-size: 0.78rem;
+}
+
+@media (max-width: 850px) {
+  .reviewFields { grid-template-columns: 1fr 1fr; }
+  .reviewFields label:nth-child(2) { grid-column: 1 / -1; grid-row: 1; }
+  .queueSummary,
+  .reviewCard > footer { align-items: flex-start; flex-direction: column; }
+}
+.uploadFeedback{display:grid;gap:9px;width:min(100%,520px);margin-top:14px;padding:14px;border:1px solid #ffffff22;border-radius:9px;background:#292c38;color:#e3e5eb}.uploadFeedback strong{font-size:.88rem}.uploadProgressMeta{display:flex;justify-content:space-between;gap:12px;color:#aeb3c1}.uploadProgressMeta strong{color:#e3e5eb}.uploadProgressTrack{position:relative;height:12px;overflow:hidden;border-radius:6px;background:#171922}.uploadProgressFill{display:block;height:100%;border-radius:inherit;background:#36c98f;transition:width .2s ease}.uploadError{margin-top:12px;padding:12px 14px;border:1px solid #f04a6844;border-radius:8px;background:#f04a6810;color:#ffb0be;line-height:1.5;overflow-wrap:anywhere}
+.pageUploadProgress{display:grid;gap:7px}.pageUploadProgressHeader{display:flex;justify-content:space-between;gap:10px;color:#c5cad6;font-size:.76rem}.pageUploadProgressHeader span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.pageUploadProgressHeader strong{flex:none}
+

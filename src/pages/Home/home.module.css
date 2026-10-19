@@ -1,0 +1,142 @@
+.homePage {
+  min-height: 100vh;
+  min-width: 768px;
+  max-width: 1280px;
+  margin-inline: auto;
+  padding-inline: 16px;
+}
+
+.homeContainer {
+  width: 100%;
+  padding-top: 40px;
+}
+
+.scansTitle {
+  font-size: 22px;
+  margin-bottom: 20px;
+}
+
+.scansGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+@media (min-width: 576px) {
+  .scansGrid {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (min-width: 768px) {
+  .scansGrid {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (min-width: 992px) {
+  .scansGrid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+}
+
+.scanCard {
+  background-color: #343746;
+  padding: 10px;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+
+  transition:
+    transform 0.2s ease-in-out,
+    box-shadow 0.2s ease-in-out;
+  position: relative;
+  will-change: transform;
+  backface-visibility: hidden;
+  cursor: pointer;
+
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.scanCard:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.25);
+}
+
+.scanContent {
+  display: flex;
+  flex-direction: row;
+  gap: 16px;
+}
+
+.scanPicture {
+  width: 130px;
+  height: 130px;
+  min-width: 130px;
+  flex: 0 0 130px;
+  border-radius: 6px;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  background: #282b38;
+}
+
+.scanInfo {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.scanNameWrapper {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 10px;
+}
+
+.scanName {
+  color: #ffffff;
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.verifiedBadge {
+  color: #13b3ac;
+  flex-shrink: 0;
+}
+
+.scanDescription {
+  color: #ffffff;
+  font-size: 14px;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+
+.scanMoreInfo {
+  color: #ffffff;
+  display: flex;
+  flex-direction: row;
+  gap: 15px;
+}
+
+.scanManga {
+  font-size: 14px;
+  font-weight: 500;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 3px;
+}
+
+.scanMangaIcon {
+  color: #226fe4;
+}

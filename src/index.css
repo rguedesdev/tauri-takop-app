@@ -1,0 +1,32 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Isso desativa TOTALMENTE a estilização padrão travada do sistema/navegador */
+button,
+input,
+select,
+textarea {
+  -webkit-appearance: none; /* Força Webkit/Safari/Tauri */
+  -moz-appearance: none; /* Força Firefox */
+  appearance: none; /* Padrão moderno */
+
+  /* Remove as amarras de borda e fundo originais */
+  border: none;
+  outline: none;
+  background: none;
+  box-sizing: border-box;
+}
+
+:root {
+  --bg-color: #282a36;
+  --card-bg-color: #343746;
+  --text-color-primary: #ffffff;
+}
+
+body {
+  background-color: var(--bg-color);
+  color: var(--text-color-primary);
+}

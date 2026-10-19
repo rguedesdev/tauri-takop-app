@@ -1,0 +1,131 @@
+@import url("https://googleapis.com");
+
+.loginPage {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  font-family: "Poppins", sans-serif;
+}
+
+.loginContainer {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  background: transparent;
+}
+
+.logoImage {
+  width: 300px;
+  height: auto;
+  margin-bottom: 16px;
+}
+
+.loginTitle {
+  font-size: 24px;
+  margin-bottom: 8px;
+}
+
+/* Input Estilizado */
+.inputsContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Estrutura de empilhamento de cada bloco de campo */
+.fieldWrapper {
+  display: flex;
+  flex-direction: column;
+  width: 320px; /* Largura idêntica travada para todos */
+}
+
+/* Rótulo / Texto superior do campo */
+.fieldLabel {
+  display: block;
+  color: #6b7280;
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-bottom: 4px;
+  padding-left: 2px;
+}
+
+/* Container de referência absoluta para o ícone */
+.inputRelativeContainer {
+  position: relative;
+  width: 100%;
+}
+
+/* Input padrão idêntico para todos */
+.loginInput {
+  width: 100%;
+  border: solid 1px #226fe4;
+  border-radius: 8px;
+  padding: 14px 40px 14px 16px; /* Abre espaço na direita para o ícone */
+  color: var(--text-color-primary);
+  font-size: 14px;
+  outline: none;
+  background-color: transparent;
+  box-sizing: border-box;
+}
+
+/* Centralizador universal do React Icons no canto direito */
+.iconContainer {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  right: 14px;
+  display: flex;
+  align-items: center;
+  pointer-events: none;
+  color: #226fe4; /* Cor azul combinando com a sua borda */
+}
+
+/* Texto de ajuda / Mensagem de rodapé */
+.helpText {
+  margin-top: 4px;
+  font-size: 0.7rem;
+  color: #6b7280;
+  padding-left: 2px;
+}
+
+/* Botão de Entrar */
+.enterBtn {
+  width: 320px;
+  color: #ffffff;
+  font-size: 16px;
+  background-color: #226fe4;
+  border-radius: 8px;
+  padding: 14px 0;
+  box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.4);
+  border: none;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  margin-top: 8px;
+  font-weight: 500;
+
+  transition: background-color 0.2s ease;
+}
+
+.enterBtn:hover {
+  background-color: #1058c5;
+}
+
+.enterBtn:active {
+  transform: scale(0.98);
+}
+
+.customToast {
+  /* Adiciona um espaçamento do topo da tela, por exemplo */
+  margin-top: 600px !important;
+
+  /* Se quiser mudar a largura dele */
+  max-width: 350px;
+
+  /* Se quiser dar um leve balanço ou mudar a animação */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+}

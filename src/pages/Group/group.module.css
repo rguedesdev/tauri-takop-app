@@ -1,0 +1,247 @@
+.groupPage {
+  min-height: 100vh;
+  min-width: 768px;
+  max-width: 1280px;
+  margin-inline: auto;
+  padding-inline: 16px;
+}
+
+.groupContainer {
+  width: 100%;
+  padding-top: 40px;
+}
+
+.groupHeader {
+  display: flex;
+  flex-direction: row;
+  gap: 16px;
+}
+
+.editGroupButton {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 40px;
+  margin-left: auto;
+  padding: 9px 13px;
+  align-self: flex-start;
+  border: 1px solid #3b82f6;
+  border-radius: 8px;
+  background: #3b82f6;
+  color: #fff;
+  font: inherit;
+  font-size: .84rem;
+  font-weight: 650;
+  cursor: pointer;
+  transition: background .15s ease, border-color .15s ease;
+}
+
+.editGroupButton:hover {
+  border-color: #2563eb;
+  background: #2563eb;
+}
+
+.editGroupButton:focus-visible {
+  outline: 2px solid #93c5fd;
+  outline-offset: 3px;
+}
+
+.profileImage {
+  width: 140px;
+  height: 140px;
+  min-width: 140px;
+  flex: 0 0 140px;
+  border-radius: 10px;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  background: #282b38;
+}
+
+.backBtn {
+  background-color: steelblue;
+  border-radius: 6px;
+  width: 100px;
+  height: 40px;
+}
+
+.mangasHeaderTexts {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.hrFaded {
+  margin-top: 20px;
+  margin-bottom: 10px;
+
+  border: none;
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(to right, transparent, #a6a8b2, transparent);
+  opacity: .35;
+}
+
+.mangasSectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.mangasTitle {
+  margin: 0;
+  font-size: 22px;
+}
+
+.addMangaButton {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 9px 13px;
+  border: 1px solid #3b82f6;
+  border-radius: 8px;
+  background: #3b82f6;
+  color: #fff;
+  font: inherit;
+  font-size: .84rem;
+  font-weight: 650;
+  cursor: pointer;
+  transition: background .15s ease, border-color .15s ease;
+}
+
+.addMangaButton:hover {
+  border-color: #2563eb;
+  background: #2563eb;
+}
+
+.addMangaButton:focus-visible {
+  outline: 2px solid #93c5fd;
+  outline-offset: 3px;
+}
+
+.mangasGrid {
+  display: grid;
+  grid-template-columns: repeat(
+    2,
+    minmax(0, 1fr)
+  ); /* 2 colunas em telas muito pequenas */
+  gap: 16px;
+}
+
+/* Simplificando os seus Media Queries antigos que estavam repetindo 1fr */
+@media (min-width: 640px) {
+  .mangasGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 768px) {
+  .mangasGrid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .mangasGrid {
+    grid-template-columns: repeat(
+      6,
+      minmax(0, 1fr)
+    ); /* Mantém o seu padrão de 6 colunas para telas grandes */
+    gap: 16px;
+  }
+}
+
+/* O CONTAINER DA IMAGEM */
+.mangaWraper {
+  position: relative;
+  aspect-ratio: 2 / 3; /* Proporção padrão de capa (Ex: 200x300) */
+  width: 100%; /* Força o wrapper a ocupar a largura total do card */
+  overflow: hidden;
+  border-radius: 6px 6px 0 0; /* Arredonda o topo do wrapper */
+}
+
+/* A IMAGEM EM SI (O segredo do preenchimento está aqui) */
+.mangaCover {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Corta e preenche o espaço útil sem distorcer as proporções da imagem */
+  object-position: center;
+  display: block; /* Remove espaçamentos fantasmas de elementos inline */
+}
+
+/* CARD PRINCIPAL */
+.mangaCard {
+  background-color: #343746;
+  border-radius: 6px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.15);
+  height: 100%; /* Força todos os cards do grid a terem a mesma altura */
+  display: flex;
+  flex-direction: column;
+
+  transition:
+    transform 0.2s ease-in-out,
+    box-shadow 0.2s ease-in-out;
+
+  position: relative;
+  will-change: transform;
+  backface-visibility: hidden;
+  cursor: pointer;
+}
+
+/* Se você usou a div .cardLink em volta do card, adicione isso para não quebrar o layout */
+.cardLink {
+  text-decoration: none;
+  display: block;
+}
+
+.mangaCard:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.25);
+}
+
+.mangaInfo {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  flex-grow: 1; /* Faz a área de texto preencher o fundo do card se o título for curto */
+}
+
+/* Mantém a linha divisória elegante dentro do card */
+.mangaCard .hrFaded {
+  margin-top: 8px;
+  margin-bottom: 8px;
+  background: linear-gradient(
+    to right,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+}
+
+.mangaInfoLine {
+  color: #ffffff;
+  font-size: 14px;
+
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 5px;
+}
+
+.mangaInfoLine > *:first-child {
+  flex-shrink: 0;
+}
+
+.mangaInfoLine > *:nth-child(2) {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
