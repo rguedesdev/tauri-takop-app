@@ -15,6 +15,7 @@ import { FiEdit2 } from "react-icons/fi";
 // Imagens Estáticas
 import MangaPlaceholder from "../../assets/manga-placeholder.svg";
 import { useObjectUrl } from "../../hooks/useObjectUrl";
+import { groupMangaSchema } from "../../shared/validation";
 
 interface MangaProps { mangaId: string; groupId: string; onCreateChapter: (mangaID: string) => void }
 function Manga({ mangaId, groupId, onCreateChapter }: MangaProps) {
@@ -74,13 +75,18 @@ function Manga({ mangaId, groupId, onCreateChapter }: MangaProps) {
 
   async function saveManga(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const validation = groupMangaSchema.safeParse({ description });
+    if (!validation.success) {
+      setMessage(validation.error.issues[0]?.message ?? "Confira a descrição do manga.");
+      return;
+    }
     setSaving(true);
     setMessage("");
     let uploaded: UploadedMedia | null = null;
     try {
       if (cover) uploaded = await uploadImage(cover, "MANGA_COVER");
       await updateGroupManga(groupId, mangaId, {
-        description: description.trim(),
+        description: validation.data.description,
         ...(uploaded ? { mangaCoverID: uploaded.id } : {}),
       });
       const group = await getGroup(groupId);
@@ -147,7 +153,7 @@ function Manga({ mangaId, groupId, onCreateChapter }: MangaProps) {
           </div>
           {canEdit && !editing && <button type="button" className={styles.editMangaButton} onClick={() => { setDescription(manga.description); setMessage(""); setEditing(true); }}><FiEdit2 size={16} />Editar informações</button>}
         </header>
-        {editing && <form className={styles.editMangaForm} onSubmit={(event) => void saveManga(event)}>
+        {editing && <form className={styles.editMangaForm} autoComplete="off" onSubmit={(event) => void saveManga(event)}>
           <h2>Editar informações do manga</h2>
           <label className={styles.descriptionField}>Descrição<textarea required minLength={120} maxLength={600} value={description} onChange={(event) => setDescription(event.target.value)} /></label>
           <div className={styles.coverField}><span>Capa</span><label className={styles.coverPicker}>

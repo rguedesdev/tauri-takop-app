@@ -1,4 +1,5 @@
 import type { ChapterFolderInfo } from "../../services/tauri";
+import { z } from "zod";
 
 export type ChapterType = "MAIN" | "EXTRA" | "SPECIAL" | "ONESHOT";
 export type BatchStatus = "PENDING" | "UPLOADING" | "PUBLISHING" | "COMPLETED" | "FAILED" | "DUPLICATE";
@@ -27,6 +28,27 @@ export interface BatchQueue {
   updatedAt: string;
   items: BatchChapterItem[];
 }
+
+const chapterTypeSchema = z.enum(["MAIN", "EXTRA", "SPECIAL", "ONESHOT"]);
+const batchItemSchema = z.object({
+  id: z.string().min(1).max(120),
+  path: z.string().min(1).max(4096),
+  folderName: z.string().min(1).max(255),
+  pageNames: z.array(z.string().min(1).max(255)).max(500),
+  chapterNumber: z.string().max(30),
+  chapterTitle: z.string().max(180),
+  chapterType: chapterTypeSchema,
+  included: z.boolean(),
+  status: z.enum(["PENDING", "UPLOADING", "PUBLISHING", "COMPLETED", "FAILED", "DUPLICATE"]),
+  uploadedCids: z.array(z.string().min(1).max(2048)).max(500).optional(),
+  uploadedTelegramPages: z.array(z.string().url().max(2048)).max(500).optional(),
+  error: z.string().max(1000).optional(),
+}).strict();
+const batchQueueSchema = z.object({
+  version: z.literal(1), mangaID: z.string().regex(/^[a-f\d]{24}$/i), groupID: z.string().regex(/^[a-f\d]{24}$/i),
+  rootFolder: z.string().min(1).max(4096), createdAt: z.string().datetime(), updatedAt: z.string().datetime(),
+  items: z.array(batchItemSchema).max(500),
+}).strict();
 
 export function queueStorageKey(mangaID: string, groupID: string) {
   return `tako:chapter-batch:v1:${groupID}:${mangaID}`;
@@ -74,11 +96,15 @@ export function createQueueItems(folders: ChapterFolderInfo[], seed = Date.now()
 
 export function validateBatchItem(item: BatchChapterItem) {
   if (!item.included || item.status === "COMPLETED" || item.status === "DUPLICATE") return null;
-  const chapterNumber = Number(item.chapterNumber);
-  if (!item.chapterNumber.trim() || !Number.isFinite(chapterNumber) || chapterNumber < 0) return "Informe um número válido e não negativo.";
-  if (item.chapterType === "MAIN" && (!Number.isInteger(chapterNumber) || chapterNumber <= 0)) return "Capítulo principal exige um número inteiro maior que zero.";
-  if (!item.chapterTitle.trim()) return "Informe o título do capítulo.";
-  if (!item.pageNames.length) return "A pasta não contém páginas suportadas.";
+  const result = z.object({
+    chapterNumber: z.string().trim().min(1).regex(/^\d+(?:\.\d+)?$/),
+    chapterTitle: z.string().trim().min(1).max(180),
+    chapterType: chapterTypeSchema,
+    pageNames: z.array(z.string().min(1)).min(1),
+  }).strict().safeParse({ chapterNumber: item.chapterNumber, chapterTitle: item.chapterTitle, chapterType: item.chapterType, pageNames: item.pageNames });
+  if (!result.success) return "Confira o número, título e páginas do capítulo.";
+  const chapterNumber = Number(result.data.chapterNumber);
+  if (result.data.chapterType === "MAIN" && (!Number.isInteger(chapterNumber) || chapterNumber <= 0)) return "Capítulo principal exige um número inteiro maior que zero.";
   return null;
 }
 
@@ -95,8 +121,10 @@ export function duplicateNumbers(items: BatchChapterItem[]) {
 export function restoreQueue(raw: string | null, mangaID: string, groupID: string): BatchQueue | null {
   if (!raw) return null;
   try {
-    const queue = JSON.parse(raw) as BatchQueue;
-    if (queue.version !== 1 || queue.mangaID !== mangaID || queue.groupID !== groupID || !Array.isArray(queue.items)) return null;
+    const parsed = batchQueueSchema.safeParse(JSON.parse(raw));
+    if (!parsed.success) return null;
+    const queue = parsed.data as BatchQueue;
+    if (queue.mangaID !== mangaID || queue.groupID !== groupID) return null;
     return {
       ...queue,
       items: queue.items.map((item) => item.status === "UPLOADING" || item.status === "PUBLISHING"

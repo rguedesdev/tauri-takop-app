@@ -52,7 +52,7 @@
 /* Rótulo / Texto superior do campo */
 .fieldLabel {
   display: block;
-  color: #6b7280;
+  color: #d7d9e1;
   font-size: 0.75rem;
   font-weight: 600;
   margin-bottom: 4px;
@@ -68,7 +68,7 @@
 /* Input padrão idêntico para todos */
 .createChapterInput {
   width: 100%;
-  border: solid 1px #226fe4;
+  border: solid 1px rgba(255, 255, 255, 0.14);
   border-radius: 8px;
   padding: 14px 40px 14px 16px; /* Abre espaço na direita para o ícone */
   color: var(--text-color-primary);
@@ -77,6 +77,8 @@
   background-color: transparent;
   box-sizing: border-box;
 }
+
+.createChapterInput:focus-visible { border-color: #3b82f6; }
 
 /* Centralizador universal do React Icons no canto direito */
 .iconContainer {
@@ -87,7 +89,7 @@
   display: flex;
   align-items: center;
   pointer-events: none;
-  color: #226fe4; /* Cor azul combinando com a sua borda */
+  color: #60a5fa;
 }
 
 /* Texto de ajuda / Mensagem de rodapé */
@@ -97,6 +99,7 @@
   color: #6b7280;
   padding-left: 2px;
 }
+.helpText[role=alert] { color: #93c5fd; font-weight: 600; }
 
 /* Botão de Entrar */
 .createBtn {

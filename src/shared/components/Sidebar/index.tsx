@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { FaBars, FaTimes, FaUserCircle } from "react-icons/fa";
+import { FiLogOut } from "react-icons/fi";
 import { MdStorage } from "react-icons/md";
 import styles from "./sidebar.module.css";
 
@@ -24,9 +25,10 @@ type Page =
 // 2. Tipamos as Props que a nossa Sidebar aceita receber
 interface SidebarProps {
   setPage: React.Dispatch<React.SetStateAction<Page>>;
+  onLogout: () => void;
 }
 
-export function Sidebar({ setPage }: SidebarProps) {
+export function Sidebar({ setPage, onLogout }: SidebarProps) {
   const [isOpen, setIsOpen] = useState(true);
 
   return (
@@ -132,6 +134,15 @@ export function Sidebar({ setPage }: SidebarProps) {
             </li>
           </ul>
         </section>
+
+        <ul className={`${styles.sidebarList} ${styles.logoutList}`}>
+          <li className={styles.sidebarItem}>
+            <button type="button" className={styles.sidebarLink} onClick={onLogout}>
+              <span className={styles.icon}><FiLogOut size={18} /></span>
+              {isOpen && <span className={styles.text}>Sair</span>}
+            </button>
+          </li>
+        </ul>
       </nav>
     </aside>
   );

@@ -45,7 +45,14 @@ export default function App() {
     >
       <ReaderPinSync />
       {/* 💥 AJUSTE AQUI: Passamos a função setPage para a Sidebar conseguir mudar as telas */}
-      <Sidebar setPage={setPage} />
+      <Sidebar
+        setPage={setPage}
+        onLogout={() => {
+          localStorage.removeItem("token");
+          localStorage.removeItem("user");
+          setPage({ name: "login" });
+        }}
+      />
 
       {/* Área da direita que recebe as suas páginas e gerencia o scroll horizontal/vertical */}
       <main

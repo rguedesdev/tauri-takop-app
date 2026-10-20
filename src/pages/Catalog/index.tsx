@@ -22,6 +22,7 @@ import {
 } from "../../services/graphql";
 import styles from "../admin.module.css";
 import { useObjectUrl } from "../../hooks/useObjectUrl";
+import { catalogMangaSchema } from "../../shared/validation";
 
 type TrackerForm = Required<Record<keyof Trackers, string>>;
 const EMPTY_TRACKERS: TrackerForm = { myanimelist: "", anilist: "", animeplanet: "", anidb: "" };
@@ -195,22 +196,24 @@ export default function Catalog({ initialGroupID }: { initialGroupID?: string })
   async function submit(event: React.FormEvent) {
     event.preventDefault();
     if (!groupID) return setMessage("Crie ou selecione um grupo.");
+    const validation = catalogMangaSchema.safeParse({
+      title, description: form.description, mangaka: form.mangaka,
+      genders: form.genders.split(",").map((value) => value.trim()).filter(Boolean),
+      demographics: selectedDemographics,
+      aliases: form.aliases.split(",").map((value) => value.trim()).filter(Boolean),
+      trackers, isAdult: form.isAdult,
+      ...(!editing && selectedMalId ? { malId: selectedMalId } : {}),
+      ...(!editing ? { translationLanguage } : {}),
+    });
+    if (!validation.success) {
+      setMessage(validation.error.issues[0]?.message ?? "Confira os dados da obra.");
+      return;
+    }
     setBusy(true);
     let uploaded: UploadedMedia | null = null;
     try {
       if (cover) uploaded = await uploadImage(cover, "MANGA_COVER");
-      const data = {
-        title,
-        description: form.description,
-        mangaka: form.mangaka,
-        genders: form.genders.split(",").map((value) => value.trim()).filter(Boolean),
-        demographics: selectedDemographics,
-        aliases: form.aliases.split(",").map((value) => value.trim()).filter(Boolean),
-        trackers,
-        isAdult: form.isAdult,
-        ...(!editing && selectedMalId ? { malId: selectedMalId, translationLanguage } : {}),
-        ...(uploaded ? { mangaCoverID: uploaded.id } : {}),
-      };
+      const data = { ...validation.data, ...(uploaded ? { mangaCoverID: uploaded.id } : {}) };
       if (editing && selectedMalId && selectedMalId !== editing.externalMetadata?.malId) {
         await linkMangaExternalMetadata(editing.id, selectedMalId);
       }
@@ -243,7 +246,7 @@ export default function Catalog({ initialGroupID }: { initialGroupID?: string })
       {externalState === "results" && !selectedMalId && !manualMode && <button className={`${styles.button} ${styles.secondary}`} type="button" onClick={startManualRegistration}>Nenhum resultado corresponde — cadastro manual</button>}
       </> : <p className={styles.muted}>{groups.length ? "Selecione um grupo acima. A busca e o cadastro serão exibidos depois da seleção." : "Você ainda não possui grupos cadastrados. Crie um grupo antes de adicionar mangas."}</p>}
     </section>
-    {(editing || manualMode || selectedMalId) && <fieldset className={`${styles.panel} ${styles.stepPanel}`}><legend>{editing ? `Editar ${editing.title}` : "3. Novo registro global"}</legend><form className={styles.stepForm} onSubmit={submit}>
+    {(editing || manualMode || selectedMalId) && <fieldset className={`${styles.panel} ${styles.stepPanel}`}><legend>{editing ? `Editar ${editing.title}` : "3. Novo registro global"}</legend><form className={styles.stepForm} autoComplete="off" onSubmit={submit}>
       {selectedCandidate && !editing && <p className={styles.muted}>Revise os dados importados. A sinopse é editável e não será substituída nas sincronizações futuras.</p>}
       {manualMode && <p className={styles.muted}>Este cadastro ficará sem MAL ID e poderá ser associado posteriormente.</p>}
       {!editing && <label>Idioma da tradução<input required maxLength={80} value={translationLanguage} onChange={(event) => setTranslationLanguage(event.target.value)} /></label>}

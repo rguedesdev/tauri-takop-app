@@ -42,6 +42,42 @@ function parseStorageLimit(value: string | null) {
   return Number.isFinite(amount) ? amount * units[unit] : null;
 }
 
+function UsageProgress({ percent, loading, label, valueText, alwaysShowPercent = false }: { percent: number | null; loading: boolean; label: string; valueText: string; alwaysShowPercent?: boolean }) {
+  const value = percent == null ? 0 : Math.min(100, Math.max(0, percent));
+  const state = value >= 90 ? "danger" : value >= 75 ? "warning" : "normal";
+  const showPercent = percent != null && (alwaysShowPercent || !loading);
+  const displayedPercent = `${value.toLocaleString("pt-BR", { maximumFractionDigits: 1 })}%`;
+  const trackRef = useRef<HTMLDivElement>(null);
+  const labelRef = useRef<HTMLSpanElement>(null);
+  const [labelFits, setLabelFits] = useState(false);
+
+  useEffect(() => {
+    const track = trackRef.current;
+    const labelElement = labelRef.current;
+    if (!track || !labelElement || !showPercent) {
+      setLabelFits(false);
+      return;
+    }
+    const measure = () => {
+      const filledWidth = track.clientWidth * value / 100;
+      const fits = filledWidth >= labelElement.getBoundingClientRect().width + 16;
+      setLabelFits((previous) => previous === fits ? previous : fits);
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(track);
+    return () => observer.disconnect();
+  }, [showPercent, value, displayedPercent]);
+
+  const labelPosition = labelFits ? "inside" : "outside";
+  return (
+    <div ref={trackRef} className={styles.usageTrack} role="progressbar" aria-label={label} aria-valuemin={0} aria-valuemax={100} aria-valuenow={value} aria-valuetext={loading ? "Consultando…" : valueText} data-state={state} data-label-position={labelPosition}>
+      <div className={styles.usageFill} data-state={state} style={{ width: `${value}%` }} />
+      {showPercent && <span ref={labelRef} className={styles.usageLabel} style={{ left: labelFits ? 8 : `calc(${value}% + 8px)` }}>{displayedPercent}</span>}
+    </div>
+  );
+}
+
 export default function Storage() {
   const { showToast } = useToast();
   const [status, setStatus] = useState<IpfsStorageStatus | null>(null);
@@ -71,7 +107,6 @@ export default function Storage() {
   const readerUsedBytes = readerStatus?.usedBytes ?? 0;
   const readerMaxBytes = Math.max(1, Math.round((readerStatus?.configuredStorageGb ?? readerStorageGb) * 1_073_741_824));
   const readerUsagePercent = Math.min(100, readerUsedBytes / readerMaxBytes * 100);
-  const readerUsageState = readerUsagePercent >= 90 ? "danger" : readerUsagePercent >= 75 ? "warning" : "normal";
   const readerSettingsChanged = readerCollaboration !== startupReaderCollaboration
     || Math.round(readerStorageGb * 1_073_741_824) !== Math.round(startupReaderStorageGb * 1_073_741_824);
   const restartRequired = groupLimitChanged || readerSettingsChanged;
@@ -174,25 +209,7 @@ export default function Storage() {
               <strong className={styles.percentage}>{loading || remainingPercent == null ? "—" : `${remainingPercent.toLocaleString("pt-BR", { maximumFractionDigits: 1 })}% restante`}</strong>
             </div>
           </div>
-          <div
-            className={styles.usageTrack}
-            role="progressbar"
-            aria-label="Espaço usado no nó IPFS"
-            aria-valuemin={0}
-            aria-valuemax={100}
-            aria-valuenow={usagePercent == null ? 0 : Math.min(100, usagePercent)}
-            aria-valuetext={usagePercent == null ? "Uso indisponível" : `${formatBytes(usedBytes)} de ${formatBytes(maxBytes)}`}
-            data-state={usagePercent != null && usagePercent >= 90 ? "danger" : usagePercent != null && usagePercent >= 75 ? "warning" : "normal"}
-          >
-            <div
-              className={styles.usageFill}
-              data-state={usagePercent != null && usagePercent >= 90 ? "danger" : usagePercent != null && usagePercent >= 75 ? "warning" : "normal"}
-              data-label-position={usagePercent != null && usagePercent >= 20 ? "inside" : "outside"}
-              style={{ width: `${usagePercent == null ? 0 : Math.min(100, usagePercent)}%` }}
-            >
-              {!loading && usagePercent != null && <span className={styles.usageLabel}>{usagePercent.toLocaleString("pt-BR", { maximumFractionDigits: 1 })}%</span>}
-            </div>
-          </div>
+          <UsageProgress percent={usagePercent} loading={loading} label="Espaço usado no nó IPFS" valueText={usagePercent == null ? "Uso indisponível" : `${formatBytes(usedBytes)} de ${formatBytes(maxBytes)}`} />
         </div>
         <div className={styles.stats}>
           <div><span>Limite de armazenamento atual</span><strong>{formatBytes(parseStorageLimit(status?.effectiveStorageMax ?? null))}</strong></div>
@@ -245,11 +262,7 @@ export default function Storage() {
               <strong className={styles.percentage}>{Math.max(0, 100 - readerUsagePercent).toLocaleString("pt-BR", { maximumFractionDigits: 1 })}% restante</strong>
             </div>
           </div>
-          <div className={styles.usageTrack} role="progressbar" aria-label="Espaço usado no armazenamento do leitor" aria-valuemin={0} aria-valuemax={100} aria-valuenow={readerUsagePercent} aria-valuetext={`${formatBytes(readerUsedBytes)} de ${formatBytes(readerMaxBytes)}`} data-state={readerUsageState}>
-            <div className={styles.usageFill} data-state={readerUsageState} data-label-position={readerUsagePercent >= 20 ? "inside" : "outside"} style={{ width: `${readerUsagePercent}%` }}>
-              <span className={styles.usageLabel}>{readerUsagePercent.toLocaleString("pt-BR", { maximumFractionDigits: 1 })}%</span>
-            </div>
-          </div>
+          <UsageProgress percent={readerUsagePercent} loading={loading} label="Espaço usado no armazenamento do leitor" valueText={`${formatBytes(readerUsedBytes)} de ${formatBytes(readerMaxBytes)}`} alwaysShowPercent />
         </div>
         <div className={styles.readerLimit}>
           <label htmlFor="reader-storage-limit">Limite de armazenamento do leitor</label>
