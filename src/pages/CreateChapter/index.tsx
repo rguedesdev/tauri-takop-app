@@ -1,5 +1,9 @@
 // Imports Principais
 import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { chapterSchema } from "../../shared/validation";
+import type { z } from "zod";
 import { uploadFolder } from "../../services/tauri";
 import { useToast } from "../../context/ToastContext";
 import { open } from "@tauri-apps/plugin-dialog"; // 👈 Importa o gerenciador de janelas nativas
@@ -15,13 +19,15 @@ import { LuFolderOpen } from "react-icons/lu";
 import BatchImport from "./BatchImport";
 
 interface CreateChapterProps { mangaID: string; groupID: string; back: () => void }
+type ChapterValues = z.infer<typeof chapterSchema>;
 
 function CreateChapter({ mangaID, groupID, back }: CreateChapterProps) {
   const { showToast } = useToast();
-  const [folder, setFolder] = useState("");
-  const [chapterNumber, setChapterNumber] = useState("");
-  const [chapterTitle, setChapterTitle] = useState("");
-  const [chapterType, setChapterType] = useState<"MAIN" | "EXTRA" | "SPECIAL" | "ONESHOT">("MAIN");
+  const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm<ChapterValues>({
+    resolver: zodResolver(chapterSchema), mode: "onTouched",
+    defaultValues: { folder: "", chapterNumber: "", chapterTitle: "", chapterType: "MAIN" },
+  });
+  const folder = watch("folder");
   const [loading, setLoading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<{ completed: number; total: number; fileName: string; stage: string } | null>(null);
   const [operationMessage, setOperationMessage] = useState("");
@@ -39,21 +45,14 @@ function CreateChapter({ mangaID, groupID, back }: CreateChapterProps) {
 
       // Se o usuário não cancelou a janela, joga o caminho no estado 'folder'
       if (selected && typeof selected === "string") {
-        setFolder(selected);
+        setValue("folder", selected, { shouldValidate: true, shouldDirty: true });
       }
     } catch (err) {
       console.error("Erro ao abrir seletor de pastas:", err);
     }
   }
 
-  async function handleSend(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-
-    if (!folder || !chapterNumber || !chapterTitle) {
-      showToast("Preencha todos os campos!", "info");
-      return;
-    }
-
+  async function handleSend(values: ChapterValues) {
     setLoading(true);
     setUploadProgress(null);
     setOperationError("");
@@ -78,9 +77,9 @@ function CreateChapter({ mangaID, groupID, back }: CreateChapterProps) {
       await createChapter({
         manga: mangaID,
         group: groupID,
-        chapterNumber: Number(chapterNumber),
-        chapterTitle: chapterTitle,
-        chapterType,
+        chapterNumber: Number(values.chapterNumber),
+        chapterTitle: values.chapterTitle,
+        chapterType: values.chapterType,
         pages: uploaded.map((x) => x.cid),
         telegramPages: uploaded.map((x) => x.telegramUrl),
       });
@@ -110,7 +109,7 @@ function CreateChapter({ mangaID, groupID, back }: CreateChapterProps) {
           <button type="button" role="tab" aria-selected={mode === "batch"} className={mode === "batch" ? styles.activeTab : ""} onClick={() => setMode("batch")} disabled={loading}>Importar pasta da obra</button>
         </div>
 
-        {mode === "single" ? <form className={styles.createChapterForm} onSubmit={handleSend}>
+        {mode === "single" ? <form className={styles.createChapterForm} autoComplete="off" noValidate onSubmit={handleSubmit(handleSend)}>
           <div className={styles.inputsContainer}>
             <div className={styles.inputsLineOne}>
               <div className={styles.fieldWrapper}>
@@ -119,16 +118,16 @@ function CreateChapter({ mangaID, groupID, back }: CreateChapterProps) {
                   <input
                     className={styles.createChapterInput}
                     type="text"
-                    value={chapterTitle}
-                    onChange={(e) => setChapterTitle(e.target.value)}
                     placeholder="Título do capítulo"
                     disabled={loading}
+                    autoComplete="off"
+                    {...register("chapterTitle")}
                   />
                   <div className={styles.iconContainer}>
                     <MdTitle size={20} />
                   </div>
                 </div>
-                <p className={styles.helpText}>Error Senha</p>
+                <p className={styles.helpText} role={errors.chapterTitle ? "alert" : undefined}>{errors.chapterTitle?.message ?? "Opcional"}</p>
               </div>
 
               <div className={styles.fieldWrapper}>
@@ -137,22 +136,24 @@ function CreateChapter({ mangaID, groupID, back }: CreateChapterProps) {
                   <input
                     className={styles.createChapterInput}
                     type="text"
-                    value={chapterNumber}
-                    onChange={(e) => setChapterNumber(e.target.value)}
                     placeholder="Exemplo: 09"
                     disabled={loading}
+                    inputMode="decimal"
+                    autoComplete="off"
+                    aria-invalid={Boolean(errors.chapterNumber)}
+                    {...register("chapterNumber")}
                   />
                   <div className={styles.iconContainer}>
                     <BiHash size={20} />
                   </div>
                 </div>
-                <p className={styles.helpText}>Error Username</p>
+                <p className={styles.helpText} role={errors.chapterNumber ? "alert" : undefined}>{errors.chapterNumber?.message ?? ""}</p>
               </div>
             </div>
 
             <div className={styles.fieldWrapper}>
               <label className={styles.fieldLabel}>Tipo do capítulo</label>
-              <select className={styles.createChapterInput} value={chapterType} onChange={(event) => setChapterType(event.target.value as typeof chapterType)} disabled={loading}>
+              <select className={styles.createChapterInput} autoComplete="off" {...register("chapterType")} disabled={loading}>
                 <option value="MAIN">Principal</option>
                 <option value="EXTRA">Extra</option>
                 <option value="SPECIAL">Especial</option>
@@ -175,8 +176,8 @@ function CreateChapter({ mangaID, groupID, back }: CreateChapterProps) {
                 </button>
                 {folder && <span className={styles.selectedFolder} title={folder}>{folder}</span>}
               </div>
-              <p className={styles.helpText}>
-                Selecione a pasta onde estão as imagens do capítulo
+              <p className={styles.helpText} role={errors.folder ? "alert" : undefined}>
+                {errors.folder?.message ?? "Selecione a pasta onde estão as imagens do capítulo"}
               </p>
             </div>
           </div>

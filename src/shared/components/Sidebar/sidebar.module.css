@@ -242,3 +242,5 @@ p {
   background-color: var(--bg--active);
 }
 .sidebarLink{background:none;border:0;padding:0;text-align:left;font:inherit;cursor:pointer;transition:background 160ms ease,color 160ms ease}
+
+.logoutList { margin-top: auto; }

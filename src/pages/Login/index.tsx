@@ -1,5 +1,8 @@
 // Imports Principais
-import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { signInSchema } from "../../shared/validation";
+import type { z } from "zod";
 import { useToast } from "../../context/ToastContext";
 
 // Requisições GraphQL
@@ -15,12 +18,10 @@ import { FaUser, FaLock } from "react-icons/fa";
 import Logo from "../../assets/tako-logo.png";
 
 function Login({ onLogin }: { onLogin: () => void }) {
-  const [login, setLogin] = useState("");
-  const [password, setPassword] = useState("");
   const { showToast } = useToast();
+  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<z.infer<typeof signInSchema>>({ resolver: zodResolver(signInSchema), mode: "onTouched" });
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
+  async function submit({ login, password }: z.infer<typeof signInSchema>) {
     try {
       const result = await signIn(login, password);
       localStorage.setItem("token", result.signIn.token);
@@ -46,7 +47,7 @@ function Login({ onLogin }: { onLogin: () => void }) {
 
   return (
     <div className={styles.loginPage}>
-      <form className={styles.loginContainer} onSubmit={handleSubmit}>
+      <form className={styles.loginContainer} autoComplete="off" noValidate onSubmit={handleSubmit(submit)}>
         <img className={styles.logoImage} src={Logo} alt="Logo" />
 
         {/* <h1 className={styles.loginTitle}>Login</h1> */}
@@ -59,15 +60,17 @@ function Login({ onLogin }: { onLogin: () => void }) {
               <input
                 className={styles.loginInput}
                 type="text"
-                placeholder="Digite o Username..."
-                value={login}
-                onChange={(e) => setLogin(e.target.value)}
+                placeholder="Digite seu username ou email"
+                autoComplete="off"
+                aria-invalid={Boolean(errors.login)}
+                aria-describedby={errors.login ? "login-error" : undefined}
+                {...register("login")}
               />
               <div className={styles.iconContainer}>
                 <FaUser size={14} />
               </div>
             </div>
-            <p className={styles.helpText}>Error Username</p>
+            <p id="login-error" className={styles.helpText} role={errors.login ? "alert" : undefined}>{errors.login?.message ?? ""}</p>
           </div>
 
           {/* 2. CAMPO COMPLEXO: SENHA */}
@@ -77,19 +80,21 @@ function Login({ onLogin }: { onLogin: () => void }) {
               <input
                 className={styles.loginInput}
                 type="password"
-                placeholder="Digite a Senha..."
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Digite sua senha"
+                autoComplete="off"
+                aria-invalid={Boolean(errors.password)}
+                aria-describedby={errors.password ? "password-error" : undefined}
+                {...register("password")}
               />
               <div className={styles.iconContainer}>
                 <FaLock size={14} />
               </div>
             </div>
-            <p className={styles.helpText}>Error Senha</p>
+            <p id="password-error" className={styles.helpText} role={errors.password ? "alert" : undefined}>{errors.password?.message ?? ""}</p>
           </div>
         </div>
 
-        <button className={styles.enterBtn}>Entrar</button>
+        <button className={styles.enterBtn} disabled={isSubmitting}>{isSubmitting && <span className={styles.spinner} aria-hidden="true" />}{isSubmitting ? "Entrando…" : "Entrar"}</button>
       </form>
     </div>
   );

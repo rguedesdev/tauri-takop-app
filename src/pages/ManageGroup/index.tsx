@@ -1,9 +1,16 @@
 import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useToast } from "../../context/ToastContext";
 
 import { createGroup, discardImage, getCountries, getMe, updateGroup, uploadImage, type CountryOption, type Group, type SocialMedias, type UploadedMedia } from "../../services/graphql";
 import styles from "../admin.module.css";
 import { useObjectUrl } from "../../hooks/useObjectUrl";
+import { groupSchema } from "../../shared/validation";
+import type { z } from "zod";
+
+type GroupValues = z.output<typeof groupSchema>;
+type GroupFormValues = z.input<typeof groupSchema>;
 
 type SocialForm = Record<keyof SocialMedias, string>;
 const EMPTY_SOCIALS: SocialForm = { site: "", discord: "", x: "", instagram: "", facebook: "", youtube: "", tiktok: "" };
@@ -25,8 +32,11 @@ export default function ManageGroup({ initialGroupID }: { initialGroupID?: strin
   const [groups, setGroups] = useState<Group[]>([]);
   const [countries, setCountries] = useState<CountryOption[]>([]);
   const [selectedID, setSelectedID] = useState(initialGroupID ?? "new");
-  const [data, setData] = useState({ name: "", description: "", countryCode: "" });
-  const [socialMedias, setSocialMedias] = useState<SocialForm>(EMPTY_SOCIALS);
+  const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm<GroupFormValues, unknown, GroupValues>({
+    resolver: zodResolver(groupSchema),
+    mode: "onTouched",
+    defaultValues: { name: "", description: "", countryCode: "", socialMedias: EMPTY_SOCIALS },
+  });
   const [image, setImage] = useState<File | null>(null);
   const imagePreview = useObjectUrl(image);
   const [message, setMessage] = useState("");
@@ -46,8 +56,7 @@ export default function ManageGroup({ initialGroupID }: { initialGroupID?: strin
       const initialGroup = user.groups.find((group) => group.id === initialGroupID);
       if (initialGroup) {
         setSelectedID(initialGroup.id);
-        setData({ name: initialGroup.name, description: initialGroup.description, countryCode: initialGroup.countryCode });
-        setSocialMedias(socialForm(initialGroup.socialMedias));
+        reset({ name: initialGroup.name, description: initialGroup.description, countryCode: initialGroup.countryCode, socialMedias: socialForm(initialGroup.socialMedias) });
       }
     }).catch((error: Error) => setMessage(error.message));
   }, [initialGroupID]);
@@ -55,19 +64,17 @@ export default function ManageGroup({ initialGroupID }: { initialGroupID?: strin
   function choose(id: string) {
     setSelectedID(id);
     const group = groups.find((item) => item.id === id);
-    setData(group ? { name: group.name, description: group.description, countryCode: group.countryCode } : { name: "", description: "", countryCode: "" });
-    setSocialMedias(socialForm(group?.socialMedias));
+    reset({ name: group?.name ?? "", description: group?.description ?? "", countryCode: group?.countryCode ?? "", socialMedias: socialForm(group?.socialMedias) });
     setImage(null);
   }
 
-  async function submit(event: React.FormEvent) {
-    event.preventDefault();
+  async function submit(values: GroupValues) {
     setBusy(true);
     setMessage("");
     let uploaded: UploadedMedia | null = null;
     try {
       if (image) uploaded = await uploadImage(image, "GROUP_IMAGE");
-      const payload = { ...data, socialMedias, ...(uploaded ? { groupImageID: uploaded.id } : {}) };
+      const payload = { ...values, ...(uploaded ? { groupImageID: uploaded.id } : {}) };
       const group = selected ? await updateGroup(selected.id, payload) : await createGroup(payload);
       await reload(group.id);
       setImage(null);
@@ -84,7 +91,7 @@ export default function ManageGroup({ initialGroupID }: { initialGroupID?: strin
 
   return <div className={styles.page}>
     <header className={styles.heading}><h1>Gerenciar grupos</h1><p>Selecione uma scan para editar ou comece um novo cadastro.</p></header>
-    <form className={styles.panel} onSubmit={submit}>
+    <form className={styles.panel} autoComplete="off" noValidate onSubmit={handleSubmit(submit)}>
       <fieldset className={styles.groupPicker}>
         <legend>Grupo</legend>
         <div className={styles.groupCards}>
@@ -96,24 +103,27 @@ export default function ManageGroup({ initialGroupID }: { initialGroupID?: strin
           </button>)}
         </div>
       </fieldset>
-      <input required placeholder="Nome do grupo" value={data.name} onChange={(event) => setData({ ...data, name: event.target.value })} />
-      <textarea required placeholder="Descrição" value={data.description} onChange={(event) => setData({ ...data, description: event.target.value })} />
-      <label>País<select required value={data.countryCode} onChange={(event) => setData({ ...data, countryCode: event.target.value })}><option value="" disabled>Selecione um país</option>{countries.map((country) => <option key={country.code} value={country.code}>{country.flag} {country.name}</option>)}</select></label>
+      <input required autoComplete="off" placeholder="Nome do grupo" aria-invalid={Boolean(errors.name)} {...register("name")} />
+      {errors.name && <p className={styles.message} role="alert">{errors.name.message}</p>}
+      <textarea required placeholder="Descrição" aria-invalid={Boolean(errors.description)} {...register("description")} />
+      {errors.description && <p className={styles.message} role="alert">{errors.description.message}</p>}
+      <label>País<select required autoComplete="off" aria-invalid={Boolean(errors.countryCode)} {...register("countryCode")}><option value="" disabled>Selecione um país</option>{countries.map((country) => <option key={country.code} value={country.code}>{country.flag} {country.name}</option>)}</select></label>
       <fieldset style={{display:"grid",gap:14,padding:18,border:"1px solid #ffffff18",borderRadius:10}}><legend style={{padding:"0 7px",fontWeight:700}}>Redes sociais</legend><p className={styles.muted}>Todos os links são opcionais e devem usar HTTPS.</p>
-        <label>Website<input type="url" maxLength={500} placeholder="https://seusite.com" value={socialMedias.site} onChange={(event) => setSocialMedias({ ...socialMedias, site: event.target.value })} /></label>
-        <label>Discord<input type="url" maxLength={500} placeholder="https://discord.gg/..." value={socialMedias.discord} onChange={(event) => setSocialMedias({ ...socialMedias, discord: event.target.value })} /></label>
-        <label>X / Twitter<input type="url" maxLength={500} placeholder="https://x.com/..." value={socialMedias.x} onChange={(event) => setSocialMedias({ ...socialMedias, x: event.target.value })} /></label>
-        <label>Instagram<input type="url" maxLength={500} placeholder="https://instagram.com/..." value={socialMedias.instagram} onChange={(event) => setSocialMedias({ ...socialMedias, instagram: event.target.value })} /></label>
-        <label>Facebook<input type="url" maxLength={500} placeholder="https://facebook.com/..." value={socialMedias.facebook} onChange={(event) => setSocialMedias({ ...socialMedias, facebook: event.target.value })} /></label>
-        <label>YouTube<input type="url" maxLength={500} placeholder="https://youtube.com/@..." value={socialMedias.youtube} onChange={(event) => setSocialMedias({ ...socialMedias, youtube: event.target.value })} /></label>
-        <label>TikTok<input type="url" maxLength={500} placeholder="https://tiktok.com/@..." value={socialMedias.tiktok} onChange={(event) => setSocialMedias({ ...socialMedias, tiktok: event.target.value })} /></label>
+        <label>Website<input type="url" autoComplete="off" maxLength={500} placeholder="https://seusite.com" {...register("socialMedias.site")} /></label>
+        <label>Discord<input type="url" autoComplete="off" maxLength={500} placeholder="https://discord.gg/..." {...register("socialMedias.discord")} /></label>
+        <label>X / Twitter<input type="url" autoComplete="off" maxLength={500} placeholder="https://x.com/..." {...register("socialMedias.x")} /></label>
+        <label>Instagram<input type="url" autoComplete="off" maxLength={500} placeholder="https://instagram.com/..." {...register("socialMedias.instagram")} /></label>
+        <label>Facebook<input type="url" autoComplete="off" maxLength={500} placeholder="https://facebook.com/..." {...register("socialMedias.facebook")} /></label>
+        <label>YouTube<input type="url" autoComplete="off" maxLength={500} placeholder="https://youtube.com/@..." {...register("socialMedias.youtube")} /></label>
+        <label>TikTok<input type="url" autoComplete="off" maxLength={500} placeholder="https://tiktok.com/@..." {...register("socialMedias.tiktok")} /></label>
       </fieldset>
+      {errors.socialMedias && <p className={styles.message} role="alert">{errors.socialMedias.message ?? errors.socialMedias.discord?.message ?? errors.socialMedias.site?.message ?? errors.socialMedias.x?.message ?? errors.socialMedias.instagram?.message ?? errors.socialMedias.facebook?.message ?? errors.socialMedias.youtube?.message ?? errors.socialMedias.tiktok?.message ?? "Confira os links informados."}</p>}
       <div className={styles.coverField}><span>Imagem do grupo</span><label className={`${styles.coverPicker} ${styles.squarePicker}`}>
         <input type="file" accept="image/jpeg,image/png,image/webp" disabled={busy} onChange={(event) => setImage(event.target.files?.[0] ?? null)} />
         {(imagePreview || selected?.groupImage) ? <img src={imagePreview || selected?.groupImage || ""} alt="Prévia da imagem do grupo" /> : <span className={styles.coverPickerEmpty}><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="2.5"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m20.5 15-5-5L5 20.5"/></svg><strong>Selecionar imagem</strong><small>JPG, PNG ou WebP</small></span>}
         {(imagePreview || selected?.groupImage) && <span className={styles.coverPickerAction}>Trocar imagem</span>}
       </label><small className={styles.muted}>A imagem será enviada ao salvar.</small></div>
-      <button className={styles.button} disabled={busy}>{busy ? "Salvando…" : selected ? "Salvar grupo" : "Criar grupo"}</button>
+      <button className={styles.button} disabled={busy || isSubmitting}>{busy || isSubmitting ? "Salvando…" : selected ? "Salvar grupo" : "Criar grupo"}</button>
       {message && <p className={styles.message}>{message}</p>}
     </form>
   </div>;
